@@ -141,6 +141,25 @@ public class InventoryController {
         }
     }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, Object> payload) {
+        try {
+            Long userId = Long.valueOf(payload.get("userId").toString());
+            String oldPassword = payload.get("oldPassword").toString();
+            String newPassword = payload.get("newPassword").toString();
+
+            boolean success = inventoryRepository.changePassword(userId, oldPassword, newPassword);
+
+            if (success) {
+                return ResponseEntity.ok().body(Map.of("message", "Password updated successfully"));
+            } else {
+                return ResponseEntity.status(401).body(Map.of("error", "Incorrect old password"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/admin/category/{id}/reactivate")
     public ResponseEntity<?> reactivateCategory(@PathVariable Long id) {
         try {
@@ -148,6 +167,84 @@ public class InventoryController {
             return ResponseEntity.ok().body(Map.of("message", "Category reactivated successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/suppliers")
+    public ResponseEntity<?> getSuppliers() {
+        try {
+            return ResponseEntity.ok(inventoryRepository.getSuppliers());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<?> getAllCategories() {
+        try {
+            return ResponseEntity.ok(inventoryRepository.getAllCategories());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/admin/add-supplier")
+    public ResponseEntity<?> addSupplier(@RequestBody Map<String, String> payload) {
+        try {
+            inventoryRepository.addSupplier(payload.get("name"), payload.get("contact"), payload.get("email"), payload.get("address"));
+            return ResponseEntity.ok(Map.of("message", "Supplier added successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/admin/add-category")
+    public ResponseEntity<?> addCategory(@RequestBody Map<String, String> payload) {
+        try {
+            inventoryRepository.addCategory(payload.get("name"), payload.get("description"));
+            return ResponseEntity.ok(Map.of("message", "Category added successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // --- USER MANAGEMENT ENDPOINTS ---
+    @GetMapping("/admin/users")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            return ResponseEntity.ok(inventoryRepository.getAllUsers());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/admin/add-user")
+    public ResponseEntity<?> addUser(@RequestBody Map<String, String> payload) {
+        try {
+            inventoryRepository.addUser(payload.get("username"), payload.get("password"), payload.get("email"), payload.get("role"));
+            return ResponseEntity.ok(Map.of("message", "User created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/admin/user/{id}/status/{status}")
+    public ResponseEntity<?> toggleUserStatus(@PathVariable Long id, @PathVariable int status) {
+        try {
+            inventoryRepository.toggleUserStatus(id, status);
+            return ResponseEntity.ok(Map.of("message", "User status updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // --- AUDIT ENDPOINT ---
+    @GetMapping("/admin/audit")
+    public ResponseEntity<?> getAuditLog() {
+        try {
+            return ResponseEntity.ok(inventoryRepository.getAuditLog());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
 }

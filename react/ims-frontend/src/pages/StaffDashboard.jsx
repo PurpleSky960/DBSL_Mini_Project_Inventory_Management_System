@@ -73,9 +73,16 @@ function StaffDashboard() {
     <div style={{ padding: '30px', fontFamily: 'sans-serif', backgroundColor: '#ECF0F1', minHeight: '100vh' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1 style={{ color: '#2C3E50', margin: 0 }}>Staff Portal - Welcome, {username}</h1>
-        <button onClick={handleLogout} style={{ padding: '10px 20px', backgroundColor: '#E74C3C', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-          LOGOUT
-        </button>
+        
+        {/* BUTTON GROUP: Change Password & Logout */}
+        <div>
+          <button onClick={() => navigate('/change-password')} style={{ padding: '10px 20px', backgroundColor: '#F39C12', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', marginRight: '10px' }}>
+            CHANGE PASSWORD
+          </button>
+          <button onClick={handleLogout} style={{ padding: '10px 20px', backgroundColor: '#E74C3C', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+            LOGOUT
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '30px' }}>

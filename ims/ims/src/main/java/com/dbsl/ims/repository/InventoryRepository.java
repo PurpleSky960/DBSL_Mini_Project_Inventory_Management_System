@@ -109,4 +109,57 @@ public class InventoryRepository {
             throw new RuntimeException("Invalid email or password, or account is disabled.");
         }
     }
+
+    // --- PASSWORD MANAGEMENT ---
+    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
+        // First check if the old password matches
+        String checkSql = "SELECT COUNT(*) FROM Users WHERE UserID = ? AND Password = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, userId, oldPassword);
+
+        if (count != null && count > 0) {
+            // If it matches, update to the new password
+            String updateSql = "UPDATE Users SET Password = ? WHERE UserID = ?";
+            jdbcTemplate.update(updateSql, newPassword, userId);
+            return true;
+        }
+        return false;
+    }
+
+    // Gets suppliers for the Add Product dropdown
+    public List<Map<String, Object>> getSuppliers() {
+        return jdbcTemplate.queryForList("SELECT SupplierID, Name FROM Suppliers WHERE Is_Active = 1");
+    }
+
+    // Gets all categories directly from the table (including empty ones)
+    public List<Map<String, Object>> getAllCategories() {
+        return jdbcTemplate.queryForList("SELECT CategoryID, Name, IS_ACTIVE FROM Category ORDER BY Name");
+    }
+
+    // Creates a brand new category
+    public void addCategory(String name, String description) {
+        String sql = "INSERT INTO Category (CategoryID, Name, Description, IS_ACTIVE) VALUES (seq_category.NEXTVAL, ?, ?, 1)";
+        jdbcTemplate.update(sql, name, description);
+    }
+
+    // --- USER MANAGEMENT ---
+    public List<Map<String, Object>> getAllUsers() {
+        return jdbcTemplate.queryForList("SELECT UserID, Username, Email, Role, Is_Active FROM Users ORDER BY UserID");
+    }
+
+    public void addUser(String username, String password, String email, String role) {
+        String sql = "INSERT INTO Users (UserID, Username, Password, Email, Role, Is_Active) VALUES (seq_users.NEXTVAL, ?, ?, ?, ?, 1)";
+        jdbcTemplate.update(sql, username, password, email, role);
+    }
+
+    public void toggleUserStatus(Long userId, int status) {
+        jdbcTemplate.update("UPDATE Users SET Is_Active = ? WHERE UserID = ?", status, userId);
+    }
+
+    // --- AUDIT REPORTS ---
+    public List<Map<String, Object>> getAuditLog() {
+        String sql = "SELECT LogID, Table_Name, Operation, Changed_By, Old_Value, New_Value, " +
+                "TO_CHAR(Change_Date, 'YYYY-MM-DD HH24:MI:SS') AS Change_Date, Description " +
+                "FROM Audit_Log ORDER BY LogID DESC FETCH FIRST 50 ROWS ONLY";
+        return jdbcTemplate.queryForList(sql);
+    }
 }
